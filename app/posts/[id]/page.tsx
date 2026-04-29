@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { posts } from "../../../lib/posts";
+import { fetchPosts } from "../../../lib/posts";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -9,7 +9,8 @@ export default async function PostDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   
-  const post = posts.find((p) => p.id.toString() === id);
+  const fetchedPosts = await fetchPosts();
+  const post = fetchedPosts.find((p) => p.id.toString() === id);
 
   if (!post) {
     return (

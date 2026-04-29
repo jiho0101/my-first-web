@@ -1,12 +1,15 @@
-import Link from "next/link";
-import { posts } from "../../lib/posts";
+import { fetchPosts } from "../../lib/posts";
+import PostList from "../../components/PostList";
 
 export const metadata = {
   title: "게시글 목록",
   description: "작성된 모든 게시글을 확인할 수 있습니다.",
 };
 
-export default function PostsPage() {
+export default async function PostsPage() {
+  // 서버 컴포넌트에서 초기 데이터(20개)를 Fetching 합니다.
+  const fetchedPosts = await fetchPosts();
+
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <header className="mb-12 text-center">
@@ -18,28 +21,8 @@ export default function PostsPage() {
         </p>
       </header>
 
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
-        {posts.map((post) => (
-          <Link 
-            key={post.id} 
-            href={`/posts/${post.id}`}
-            className="group block h-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-2xl"
-          >
-            <article className="h-full flex flex-col bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-blue-400 transform hover:-translate-y-1 transition-all duration-300">
-              <h2 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 mb-3">
-                {post.title}
-              </h2>
-              <p className="text-gray-600 line-clamp-3 mb-4 flex-grow text-base leading-relaxed">
-                {post.content}
-              </p>
-              <div className="flex items-center justify-between text-sm text-gray-500 mt-auto pt-4 border-t border-gray-100">
-                <span className="font-medium text-gray-700">{post.author}</span>
-                <time dateTime={post.date}>{post.date}</time>
-              </div>
-            </article>
-          </Link>
-        ))}
-      </div>
+      {/* 클라이언트 컴포넌트로 초기 데이터를 넘겨주어 상태 관리(검색/추가/삭제)를 위임합니다. */}
+      <PostList initialPosts={fetchedPosts} />
     </div>
   );
 }
