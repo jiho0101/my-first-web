@@ -17,26 +17,54 @@ The architecture is designed to be extended with Supabase CRUD, authentication, 
 
 ## 3. Page Map
 
+### Core Pages (Ch7-Ch8)
 | URL | Page | Description |
 |---|---|---|
 | `/` | Home | Main landing page and post preview area |
 | `/posts` | Post List | Displays all blog posts |
-| `/posts/new` | New Post | Form page for creating a new post |
 | `/posts/[id]` | Post Detail | Displays a single post by id |
-| `/mypage` | My Page | User profile and user's posts |
+
+### Ch9 Auth Pages (Implemented)
+| URL | Page | Description |
+|---|---|---|
 | `/login` | Login | Email/password login page |
 | `/signup` | Signup | Email/password signup page |
+| `/posts/new` | New Post | Protected route (requires auth). Form page for creating a new post |
 
-## 4. Current App Router Structure
+### Planned Pages (Future)
+| URL | Page | Description |
+|---|---|---|
+| `/mypage` | My Page | User profile and user's posts (protected route) |
+
+## 4. Current App Router Structure (Post-Ch9)
 
 ```text
 app/
 ├─ page.tsx
-├─ layout.tsx
+├─ layout.tsx          # Wrapped with AuthProvider
 ├─ globals.css
+├─ login/
+│  └─ page.tsx
+├─ signup/
+│  └─ page.tsx
 └─ posts/
    ├─ page.tsx
    ├─ new/
-   │  └─ page.tsx
+   │  └─ page.tsx     # Protected by middleware.ts
    └─ [id]/
       └─ page.tsx
+
+components/
+├─ AuthNav.tsx         # Auth-aware navigation
+└─ ...
+
+contexts/
+└─ AuthContext.tsx     # Global auth state & useAuth hook
+
+lib/
+├─ auth.ts            # signInWithEmail, signUpWithEmail, signOut
+├─ supabase/
+│  └─ client.ts       # Browser Supabase client
+└─ ...
+
+middleware.ts          # Protects /posts/new route

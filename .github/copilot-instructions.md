@@ -2,6 +2,12 @@
 - Next.js: 16.2.1 (App Router ONLY)
 - Tailwind CSS: ^4
 
+## Version Policy
+- 교재 기준: Next.js 16.2.1, @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2
+- 실제 package.json은 더 최신일 수 있다.
+- 수업 프롬프트와 설명은 교재 기준으로 통일한다.
+- 빌드 오류가 버전 차이에서 발생하면 package.json 기준으로 원인을 확인한다.
+
 # Coding Conventions
 - Server Component 기본 (Use Server Components by default)
 - Tailwind CSS만 사용 (Use Tailwind CSS exclusively)
@@ -83,8 +89,16 @@
 
 ## Auth Rules
 - 이메일/비밀번호 로그인 사용
+- 로그아웃, 로그인 상태 유지 구현
 - 로그인 사용자만 글 작성 가능
 - 게시글 조회는 모두 가능
+- `/posts/new`은 보호 라우트로 처리
+- 이 교재에서는 보호 라우트 파일로 middleware.ts를 사용
+- Supabase Auth 로그인은 signInWithPassword 사용
+- auth.signIn() 구버전은 사용하지 않는다
+- service_role 키는 클라이언트에 절대 두지 않는다
+- 소셜 로그인은 추가하지 않는다
+- 환경변수: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 # UI/UX Rules
 
