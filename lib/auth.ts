@@ -1,4 +1,4 @@
-import { supabase } from "./supabase/client";
+import { supabase } from "@/lib/supabase/client";
 
 export async function signInWithEmail(email: string, password: string) {
   return await supabase.auth.signInWithPassword({
@@ -7,7 +7,11 @@ export async function signInWithEmail(email: string, password: string) {
   });
 }
 
-export async function signUpWithEmail(email: string, password: string, name: string) {
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  name: string
+) {
   return await supabase.auth.signUp({
     email,
     password,
