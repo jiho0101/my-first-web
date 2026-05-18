@@ -1,34 +1,115 @@
+import { supabase } from './supabase/client';
+
 export type Post = {
-  id: number;
+  id: string;
+  user_id: string;
   title: string;
   content: string;
-  author: string;
-  date: string;
+  created_at: string;
 };
 
-// JSONPlaceholder에서 게시글을 가져오는 비동기 함수
-// 서버 컴포넌트나 서버 액션 등에서 직접 호출할 수 있습니다.
+// Supabase posts 테이블에서 모든 게시글을 조회 (최신순)
 export async function fetchPosts(): Promise<Post[]> {
-  const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
-    // Next.js 개발 모드에서 매번 새로운 데이터를 보기 원할 경우 대비해 캐시를 끕니다.
-    // 실서비스에서는 cache: 'force-cache'나 revalidate를 사용할 수 있습니다.
-    cache: "no-store", 
-  });
-  
-  if (!res.ok) {
-    throw new Error("Failed to fetch posts from JSONPlaceholder");
-  }
-  
-  const json = await res.json();
-  
-  // 데이터가 100개이므로 초기엔 20개 정도만 가져오겠습니다.
-  const data = json.slice(0, 20);
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, user_id, title, content, created_at')
+      .order('created_at', { ascending: false });
 
-  return data.map((item: any) => ({
-    id: item.id,
-    title: item.title,
-    content: item.body,
-    author: `User ${item.userId}`,
-    date: new Date().toISOString().split("T")[0],
-  }));
+    if (error) {
+      console.error('Failed to fetch posts from Supabase:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching posts:', err);
+    return [];
+  }
+}
+
+// Supabase posts 테이블에서 특정 게시글을 조회
+export async function getPost(id: string): Promise<Post | null> {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('id, user_id, title, content, created_at')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Failed to fetch post from Supabase:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching post:', err);
+    return null;
+  }
+}
+
+export async function createPost(
+  title: string,
+  content: string,
+  user_id: string
+): Promise<Post | null> {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([{ title, content, user_id }])
+      .select('id, user_id, title, content, created_at')
+      .single();
+
+    if (error) {
+      console.error('Failed to create post:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error creating post:', err);
+    return null;
+  }
+}
+
+export async function updatePost(
+  id: string,
+  title: string,
+  content: string
+): Promise<Post | null> {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ title, content })
+      .eq('id', id)
+      .select('id, user_id, title, content, created_at')
+      .single();
+
+    if (error) {
+      console.error('Failed to update post:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return null;
+  }
+}
+
+export async function deletePost(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('posts').delete().eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete post:', error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Error deleting post:', err);
+    return false;
+  }
 }

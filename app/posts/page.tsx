@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function PostsPage() {
-  // 서버 컴포넌트에서 초기 데이터(20개)를 Fetching 합니다.
+  // Supabase에서 게시글 데이터 조회
   const fetchedPosts = await fetchPosts();
 
   return (
@@ -21,8 +21,15 @@ export default async function PostsPage() {
         </p>
       </header>
 
-      {/* 클라이언트 컴포넌트로 초기 데이터를 넘겨주어 상태 관리(검색/추가/삭제)를 위임합니다. */}
-      <PostList initialPosts={fetchedPosts} />
+      {/* 게시글이 없을 때 */}
+      {fetchedPosts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">게시글이 없습니다.</p>
+        </div>
+      ) : (
+        /* 클라이언트 컴포넌트로 초기 데이터를 넘겨주어 상태 관리(검색)를 위임합니다. */
+        <PostList initialPosts={fetchedPosts} />
+      )}
     </div>
   );
 }

@@ -1,27 +1,103 @@
-# Project Agent Rules
+# Project Agent Rules (Ch10+)
 
-## App Router
-- Next.js 16 App Router만 사용합니다.
-- `pages` 라우터를 사용하지 않습니다.
-- 클라이언트 내비게이션은 `next/navigation`을 사용합니다.
-- `next/router`는 사용하지 않습니다.
+## Next.js & Routing
+- **Next.js 16 App Router only** — no Pages Router
+- Client navigation: `next/navigation` only (Router, useRouter)
+- ❌ Forbidden: `next/router`
+- Dynamic routes: `/posts/[id]` (not `/posts/:id`)
+- `params` must be awaited: `const { id } = await params`
 
-## Auth & Supabase
-- 이메일/비밀번호 인증만 구현합니다.
-- 소셜 로그인은 추가하지 않습니다.
-- Supabase Auth 로그인은 `signInWithPassword`를 사용합니다.
-- `auth.signIn()` 구버전은 사용하지 않습니다.
-- 보호 라우트는 `middleware.ts` 파일로 처리합니다.
-- `service_role` 키를 클라이언트에 절대 두지 않습니다.
-- `@supabase/ssr` 패턴을 따라 서버 측 인증 헬퍼를 분리합니다.
-- 환경변수 이름은 `NEXT_PUBLIC_SUPABASE_URL` 및 `NEXT_PUBLIC_SUPABASE_ANON_KEY`를 유지합니다.
+## Server vs Client Components
+- **Default: Server Components** for data fetching and page rendering
+- **Client Components ("use client")** only for:
+  - Form interactions (input state, submission)
+  - useAuth() hook usage
+  - Event handlers (onClick, onChange, etc.)
+  - Navigation (useRouter)
 
-## UI / 구현 범위
-- `shadcn/ui` 컴포넌트를 기본 UI 시스템으로 사용합니다.
-- Tailwind CSS만 씁니다.
-- 서버 컴포넌트 기본, 클라이언트 컴포넌트는 상호작용이 필요한 곳에만 사용합니다.
+## Auth & Supabase (Ch9+)
+- Email/password auth only (no social login)
+- `signInWithPassword` method only (not `auth.signIn()`)
+- `@supabase/ssr` pattern: `createBrowserClient` in `lib/supabase/client.ts`
+- Protected routes via `middleware.ts` (not component-level route guards)
+- **Never** add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`
+- Environment: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Data Layer (Ch10 CRUD)
+- Use `lib/supabase/client.ts` for all Supabase operations (queries, inserts, updates, deletes)
+- Server Components can import and call functions from `lib/posts.ts`
+- Client Components use `useAuth()` to check current user before form submission
+- Query pattern: `supabase.from('posts').select(...).eq(...)`
+- Insert pattern: `supabase.from('posts').insert([...])`
+- Update pattern: `supabase.from('posts').update(...).eq('id', id)`
+- Delete pattern: `supabase.from('posts').delete().eq('id', id)`
+
+## UI & Styling
+- **shadcn/ui components** as default UI system
+- **Tailwind CSS only** for styling (no custom CSS except globals.css)
+- Spacing: `p-4`, `p-6`, `gap-4`, `gap-6`
+- Colors: Use CSS variables from `globals.css` (--primary, --primary-foreground)
+- Design: Minimal, clean, card-based layouts
+
+### Core Components Used
+- `Button` — form submit, delete, navigate
+- `Card` — content containers, post preview
+- `Input` — text fields (title, search)
+- `Textarea` — post content field
+
+## Database Schema (Ch8)
+```
+posts:
+  - id (uuid, PK)
+  - user_id (uuid, FK)
+  - title (text)
+  - content (text)
+  - created_at (timestamptz)
+
+profiles:
+  - id (uuid, PK)
+  - username (text)
+  - avatar_url (text)
+  - created_at (timestamptz)
+```
+
+## Ch10 CRUD Rules
+1. **READ**: Fetch posts in Server Component, render with PostList
+2. **CREATE**: Form in Client Component (`/posts/new`), submit via server action or API
+3. **UPDATE/DELETE**: Show buttons only to post author (UX check with `useAuth()`)
+   - Actual security enforcement happens in Ch11 via RLS
+   - Do NOT skip the UX check (user experience)
+4. Edit flow: Either inline edit in detail page or separate `/posts/[id]/edit` page
 
 ## Version Policy
-- 교재 기준: Next.js 16.2.1, @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2
-- 실제 package.json은 더 최신일 수 있습니다.
-- 문서와 프롬프트는 교재 기준으로 통일하되, 빌드 오류가 버전 차이에서 발생하면 package.json을 우선 확인합니다.
+| Item | Textbook | Actual | Notes |
+|------|----------|--------|-------|
+| Next.js | 16.2.1 | 16.2.1 | Fixed |
+| @supabase/supabase-js | 2.47.12 | ^2.105.4 | Higher OK, check if build breaks |
+| @supabase/ssr | 0.5.2 | ^0.10.3 | Higher OK, check if build breaks |
+
+- Documentation (prompts, instructions) follow textbook versions
+- Code implementation follows actual package.json versions
+- Build errors: Check actual package.json first
+
+## Build & Deploy
+```bash
+npm run dev          # Development mode
+npm run build        # Verify TypeScript + build
+npm run lint         # Type check
+```
+
+Before committing Ch10 work:
+1. ✅ Test CRUD flows in browser
+2. ✅ No TypeScript errors (`npm run lint`)
+3. ✅ Build succeeds (`npm run build`)
+4. ✅ Update `.github/context.md` with completion notes
+
+## Restrictions (Global)
+- ❌ Pages Router
+- ❌ `next/router`
+- ❌ Social login
+- ❌ `service_role` key in client
+- ❌ Custom UI if shadcn/ui exists
+- ❌ Server actions in components marked "use client" (use POST route handlers instead)
+- ✅ App Router, `next/navigation`, Email/password auth, Server Components

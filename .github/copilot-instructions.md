@@ -55,6 +55,7 @@
 - Use `next/navigation` instead of `next/router`
 - Use Server Components by default
 - Use Client Components only when interaction is required
+- Do NOT use Pages Router anywhere
 
 ## Routing Rules
 - `/` → Home
@@ -75,6 +76,7 @@
 - id (uuid, PK, auth.users 연결)
 - username (text)
 - avatar_url (text)
+- role (text)
 - created_at (timestamptz)
 
 ### posts
@@ -99,6 +101,7 @@
 - service_role 키는 클라이언트에 절대 두지 않는다
 - 소셜 로그인은 추가하지 않는다
 - 환경변수: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+- posts/columns 명은 Ch8 스키마(`id`, `user_id`, `title`, `content`, `created_at`)에서 변경하지 않는다
 
 # UI/UX Rules
 
@@ -107,8 +110,31 @@
 - Focus on readability
 - Keep layout simple and predictable
 
-# Important
+# Ch10 CRUD Rules
+
+## Supabase Data Operations
+- Use `lib/supabase/client.ts` for all queries (createBrowserClient pattern)
+- Query operations:
+  - `supabase.from('posts').select('*').eq('id', id)`
+  - `supabase.from('posts').insert([...])`
+  - `supabase.from('posts').update({...}).eq('id', id)`
+  - `supabase.from('posts').delete().eq('id', id)`
+
+## CRUD Implementation
+- **READ** (GET): Server Components fetch data in `/posts` and `/posts/[id]`
+- **CREATE** (POST): Client form in `/posts/new` → submit → Server Component or API route
+- **UPDATE/DELETE**: Show UI controls only if `useAuth().user.id === post.user_id`
+  - Actual security enforcement happens in Ch11 via Row-Level Security
+  - Do NOT skip the UI check—it's part of good UX
+
+## Client vs Server Components
+- Form pages (`/login`, `/signup`, `/posts/new`): Client Component with "use client"
+- Data display pages (`/posts`, `/posts/[id]`): Server Component (fetch in page.tsx)
+- Mixed: Server page.tsx renders Server components for data + Client components for forms/buttons
+
+## Important
 
 - Do NOT modify routing structure unnecessarily
 - Do NOT mix Pages Router and App Router
 - Always follow design tokens and component rules
+- Do NOT add Update/Delete security logic beyond UX checks (RLS handles actual security in Ch11)

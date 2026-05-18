@@ -9,7 +9,15 @@ This repository uses Next.js 16 App Router and Supabase. Follow `.github/copilot
 - Supabase Auth는 이메일/비밀번호만 사용
 - 보호 라우트는 `middleware.ts`로 처리
 - `signInWithPassword` 사용, `auth.signIn()` 구버전 금지
+- `service_role` 또는 서버 전용 키를 클라이언트에서 사용하지 않음
 - 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Ch10 CRUD
+- Use `lib/supabase/client.ts` for all Supabase data operations (from, select, insert, update, delete)
+- Server Components for data fetching, Client Components for forms
+- posts 컬럼명은 Ch8 스키마(`id`, `user_id`, `title`, `content`, `created_at`) 그대로 유지
+- Show edit/delete buttons only to post author (UX), actual security via RLS in Ch11
+- Fetch posts with author info: `select('*, profiles(*)')`
 
 ## Version Policy
 - 교재 기준: Next.js 16.2.1, @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2

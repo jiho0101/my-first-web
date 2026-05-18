@@ -4,9 +4,10 @@ import { useState, FormEvent } from "react";
 
 interface PostFormProps {
   onSubmit: (title: string, content: string) => void;
+  disabled?: boolean;
 }
 
-export default function PostForm({ onSubmit }: PostFormProps) {
+export default function PostForm({ onSubmit, disabled = false }: PostFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -53,7 +54,8 @@ export default function PostForm({ onSubmit }: PostFormProps) {
       <div className="flex justify-end">
         <button
           type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          disabled={disabled}
+          className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${disabled ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
         >
           등록하기
         </button>
